@@ -30,6 +30,11 @@ def displayOne(name):
 
 @app.route('/test/<string:name>', methods=['DELETE'])
 def deleteOne(name):
+    '''
+    Delete the matrix in the dict
+    :param name: 
+    :return: 
+    '''
     if matrices[name] != None:
         matrices.pop(name, None)
         return "The matrix " + name + " has been deleted from the list."
