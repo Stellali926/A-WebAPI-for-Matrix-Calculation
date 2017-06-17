@@ -1,0 +1,17 @@
+<!doctype html>
+<html>
+    <head>
+        <h3>The matrix {{ name }} is : </h3>
+    </head>
+    <body>
+        <table style="margin-right:100px">
+            {% for row in res %}
+                <tr style="padding-top:10px">
+                {% for column in row %}
+                    <th style="padding-left:10px">{{ column }}</th>
+                {% endfor %}
+                </tr>
+            {% endfor %}
+        </table>
+    </body>
+</html>
