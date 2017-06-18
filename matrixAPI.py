@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, Response, json, render_template
+from flask import Flask, jsonify, request, render_template
 
 app = Flask(__name__)
 
@@ -79,8 +79,8 @@ def deleteOne(name):
 @app.route('/calculations', methods=['POST'])
 def do_calculations():
     '''
-    
-    :return: 
+    POST call realize the matrix calculations including add, subtraction and multiplication
+    :return: The matrix after the calculation in HTML table format
     
     (The example input json format: )
     {
@@ -114,7 +114,7 @@ def do_calculations():
                        "matrixdata": resRow}
             name = calRequest['resultant']
             matrices.update({name:newData})
-            return render_template("matrixTable.html", res = matrices[name]['matrixdata'],name=name), 200
+            return "AFTER " + calRequest['operationtype'].upper() + ": " + render_template("matrixTable.html", res = matrices[name]['matrixdata'],name=name), 200
         else:
             error = {}
             error.update({'datatype': 'status'})
@@ -144,7 +144,7 @@ def do_calculations():
                        "matrixdata": resRow}
             name = calRequest['resultant']
             matrices.update({name:newData})
-            return render_template("matrixTable.html", res=matrices[name]['matrixdata'], name=name), 200
+            return "AFTER MULTIPLICATION: " + render_template("matrixTable.html", res=matrices[name]['matrixdata'], name=name), 200
         else:
             error = {}
             error.update({'datatype': 'status'})
@@ -161,9 +161,9 @@ def page_not_found(e):
 def request_wrong(e):
     return "The request method does not match. Check the request.(405)"
 
-# @app.errorhandler(Exception)
-# def all_exception_handler(error):
-#     return "Server is down, please check your url and try again.", 500
+@app.errorhandler(Exception)
+def all_exception_handler(error):
+    return "Server is down, please check your url and try again.", 500
 
 if __name__ == '__main__':
     app.run(debug=True,port=8080)
