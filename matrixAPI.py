@@ -6,9 +6,9 @@ matrices = {}
 
 @app.route('/', methods = ['GET'])
 def returnALL():
-    return jsonify({'matrices': matrices})
+    return render_template("welcome.html", storedMatrix = matrices)
 
-@app.route('/matrix/<string:name>',methods=['PUT','POST'])
+@app.route('/matrices/<string:name>',methods=['PUT','POST'])
 def addOne(name):
     '''
     PUT and POST method to add or revise a matrix in the dict
@@ -41,7 +41,7 @@ def addOne(name):
         error.update({'errorcode':11})
         return jsonify(error)
 
-@app.route('/matrix/<string:name>')
+@app.route('/matrices/<string:name>')
 def displayOne(name):
     '''
     GET method to display the matrix in the dict
@@ -58,7 +58,7 @@ def displayOne(name):
         error.update({'errorcode':10})
         return jsonify(error)
 
-@app.route('/matrix/<string:name>', methods=['DELETE'])
+@app.route('/matrices/<string:name>', methods=['DELETE'])
 def deleteOne(name):
     '''
     DELETE the matrix in the dict
@@ -94,10 +94,12 @@ def do_calculations():
     calRequest = request.json
     operand1 = calRequest['operand1']
     operand2 = calRequest['operand2']
+    #If the operation type is add or subtraction, use two loops to get the new matrix
     if calRequest['operationtype'] == 'add' or calRequest['operationtype'] == 'subtraction':
+        # judge whether the matrices are eligible to do the add or subtraction
         if matrices[operand1]['numcols'] == matrices[operand2]['numcols'] and matrices[operand1]['numrows'] == matrices[operand2]['numrows']:
             row = 0
-            resRow = []
+            resRow = []  #initialize the new matrix
             while(row < matrices[operand1]['numrows']):
                 resCol = []
                 col = 0
@@ -114,21 +116,22 @@ def do_calculations():
                        "matrixdata": resRow}
             name = calRequest['resultant']
             matrices.update({name:newData})
-            return "AFTER " + calRequest['operationtype'].upper() + ": " + render_template("matrixTable.html", res = matrices[name]['matrixdata'],name=name), 200
-        else:
+            return "AFTER " + calRequest['operationtype'].upper() + ": " + render_template("matrixTable.html", res = matrices[name]['matrixdata'],name=name), 200 # use html table to disply the data
+        else: # prompt the error if the matrix cannot do add or subtracktion
             error = {}
             error.update({'datatype': 'status'})
             error.update({'statusmessage': "The number of columns and rows are not same, cannot do add or subtractions"})
             error.update({'errorcode': 12})
             return jsonify(error)
 
+    # when the operation type is multiplication, use three loop to do the multiply
     elif calRequest['operationtype'] == 'multiplication':
-        if matrices[operand1]['numcols'] == matrices[operand2]['numrows']:
+        if matrices[operand1]['numcols'] == matrices[operand2]['numrows']:  # judge whether the matrices are eligible to do the multiplication
             numRow = 0
-            resRow = []
+            resRow = []  #initialize the matrixdata for new matrix
             while numRow < matrices[operand1]['numrows']:
                 numCol = 0
-                resCol = []
+                resCol = [] #initialize each row of the matrix
                 while numCol < matrices[operand2]['numcols']:
                     numSameRowCol = 0
                     eachNum = 0
@@ -145,7 +148,7 @@ def do_calculations():
             name = calRequest['resultant']
             matrices.update({name:newData})
             return "AFTER MULTIPLICATION: " + render_template("matrixTable.html", res=matrices[name]['matrixdata'], name=name), 200
-        else:
+        else: # prompt the error if the matrix cannot do multiplication
             error = {}
             error.update({'datatype': 'status'})
             error.update({'statusmessage': "The number of rows of the first matrix does not match the number of columns of the second matrix, can't do multiplication."})
@@ -155,15 +158,45 @@ def do_calculations():
 
 @app.errorhandler(404)
 def page_not_found(e):
-    return "The page you found does not match, check your spell!!(404)"
+    '''
+    Error Message when the entered url does not match records
+    :param e: the error 
+    :return: the error message
+    '''
+    error = {}
+    error.update({'datatype': 'status'})
+    error.update({
+                  'statusmessage': "The page you found does not match, check your spell!!"})
+    error.update({'errorcode': 404})
+    return jsonify(error)
 
 @app.errorhandler(405)
 def request_wrong(e):
-    return "The request method does not match. Check the request.(405)"
+    '''
+    Error message when the request does not match the server
+    :param e: the error 
+    :return: the error message
+    '''
+    error = {}
+    error.update({'datatype': 'status'})
+    error.update({
+                  'statusmessage': "The request method does not match. Check the request."})
+    error.update({'errorcode': 405})
+    return jsonify(error)
 
 @app.errorhandler(Exception)
 def all_exception_handler(error):
-    return "Server is down, please check your url and try again.", 500
+    '''
+    Error message catch all other exception
+    :param error: the error
+    :return: the error message
+    '''
+    error = {}
+    error.update({'datatype': 'status'})
+    error.update({
+                  'statusmessage': "Server is down, please check your url and try again."})
+    error.update({'errorcode': 500})
+    return jsonify(error)
 
 if __name__ == '__main__':
     app.run(debug=True,port=8080)

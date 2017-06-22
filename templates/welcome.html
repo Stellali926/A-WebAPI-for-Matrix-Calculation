@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang = "en">
+    <meta charset = "UTF-8">
+    <head>
+        <title> Welcome </title>
+    </head>
+    <body>
+        <header>
+            <h2> Welcome to the Matrix Calculation RESTFUL API</h2>
+        </header>
+        <section>
+            <h3>The Introduction of the Functions</h3>
+            <details>
+                <summary>Store A Matrix</summary>
+                <p>Using POST/PUT call with route "/matrices/(the name of the matrix you stored)"to store one matrix.
+                    The example json format of the matrix is:</p>
+                <p>    {"datatype": "Matrix","name": "A","data":{"numrows":2,"numcols":2,"matrixdata":[[2,2],[2,2]]}}</p>
+            </details>
+            <details>
+                <summary>Display A Matrix</summary>
+                <p>Using GET call with route "/matrices/(the name of the matrix you want to display)".
+            </details>
+            <details>
+                <summary>Delete A Matrix</summary>
+                <p>Using DELETE call with route "/matrices/(the name of the matrix you want to delete)".
+            </details>
+            <details>
+                <summary>Matrix Calculation</summary>
+                <p>Using POST call with route "/matrices/calculations" to do matrix calculations. You can indicate the operation in the json input.
+                    The example json format of the matrix is:</p>
+                <p> {"datatype": "operation","operationtype": "add","operand1": "A","operand2": "B","resultant": "C"}</p>
+            </details>
+        </section>
+        <section>
+            <h3>All matrices currently stored are: </h3>
+            <ul>
+                {% for matrix in storedMatrix %}
+                <li>{{ matrix }}:</li>
+                    <table style="margin-right:200px">
+                        {% for row in storedMatrix[matrix]['matrixdata'] %}
+                        <tr style="padding-top:10px">
+                            {% for column in row %}
+                            <th style="padding-left:10px">{{ column }}</th>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </table>
+                {% endfor %}
+            </ul>
+        </section>
+    </body>
+</html>
