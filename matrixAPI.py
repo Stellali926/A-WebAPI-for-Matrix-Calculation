@@ -9,7 +9,7 @@ def returnALL():
     return render_template("welcome.html", storedMatrix = matrices)
 
 @app.route('/matrices/<string:name>',methods=['PUT','POST'])
-def addOne(name):
+def addOne(name,):
     '''
     PUT and POST method to add or revise a matrix in the dict
     :param name: the name of the matrix (key value in the dict)
@@ -41,7 +41,7 @@ def addOne(name):
         error.update({'errorcode':11})
         return jsonify(error)
 
-@app.route('/matrices/<string:name>')
+@app.route('/displaymatrix/<string:name>')
 def displayOne(name):
     '''
     GET method to display the matrix in the dict
@@ -51,6 +51,24 @@ def displayOne(name):
     try:
         if matrices[name] != None:
             return render_template("matrixTable.html", res = matrices[name]['matrixdata'],name=name), 200
+    except Exception:
+        error = {}
+        error.update({'datatype':'status'})
+        error.update({'statusmessage':"The matrix " + name + " does not store in the list."})
+        error.update({'errorcode':10})
+        return jsonify(error)
+
+@app.route('/matrices/<string:name>', methods=['GET'])
+def json_matrix(name):
+    '''
+    Display one matrix in json format
+    the matrix contains the number of columns and rows, and the matrix data
+    :param name: the name of the matrix
+    :return: json format of that matrix
+    '''
+    try:
+        if matrices[name] != None:
+            return jsonify(matrices[name])
     except Exception:
         error = {}
         error.update({'datatype':'status'})
@@ -98,56 +116,27 @@ def do_calculations():
     if calRequest['operationtype'] == 'add' or calRequest['operationtype'] == 'subtraction':
         # judge whether the matrices are eligible to do the add or subtraction
         if matrices[operand1]['numcols'] == matrices[operand2]['numcols'] and matrices[operand1]['numrows'] == matrices[operand2]['numrows']:
-            row = 0
-            resRow = []  #initialize the new matrix
-            while(row < matrices[operand1]['numrows']):
-                resCol = []
-                col = 0
-                while(col < matrices[operand1]['numcols']):
-                    if calRequest['operationtype'] == 'add':
-                        resCol.append(matrices[operand1]['matrixdata'][row][col] + matrices[operand2]['matrixdata'][row][col])
-                    else:
-                        resCol.append(matrices[operand1]['matrixdata'][row][col] - matrices[operand2]['matrixdata'][row][col])
-                    col += 1
-                resRow.append(resCol)
-                row += 1
-            newData = {"numrows" : matrices[operand1]['numrows'],
-                       "numcols" : matrices[operand1]['numcols'],
-                       "matrixdata": resRow}
-            name = calRequest['resultant']
-            matrices.update({name:newData})
-            return "AFTER " + calRequest['operationtype'].upper() + ": " + render_template("matrixTable.html", res = matrices[name]['matrixdata'],name=name), 200 # use html table to disply the data
+            if calRequest['operationtype'] == 'add':
+                add(calRequest['resultant'],matrices[operand1],matrices[operand2])
+            else:
+                subtraction(calRequest['resultant'],matrices[operand1],matrices[operand2])
+            message = "Matrix " + calRequest['operationtype'] + " successed!"
+            success={'datatype':'status','statusmessage':message,'errorcode':0}
+            return jsonify(success)
         else: # prompt the error if the matrix cannot do add or subtracktion
             error = {}
             error.update({'datatype': 'status'})
             error.update({'statusmessage': "The number of columns and rows are not same, cannot do add or subtractions"})
             error.update({'errorcode': 12})
             return jsonify(error)
-
     # when the operation type is multiplication, use three loop to do the multiply
     elif calRequest['operationtype'] == 'multiplication':
-        if matrices[operand1]['numcols'] == matrices[operand2]['numrows']:  # judge whether the matrices are eligible to do the multiplication
-            numRow = 0
-            resRow = []  #initialize the matrixdata for new matrix
-            while numRow < matrices[operand1]['numrows']:
-                numCol = 0
-                resCol = [] #initialize each row of the matrix
-                while numCol < matrices[operand2]['numcols']:
-                    numSameRowCol = 0
-                    eachNum = 0
-                    while numSameRowCol < matrices[operand1]['numcols']:
-                        eachNum += matrices[operand1]['matrixdata'][numRow][numSameRowCol] * matrices[operand2]['matrixdata'][numSameRowCol][numCol]
-                        numSameRowCol += 1
-                    resCol.append(eachNum)
-                    numCol += 1
-                resRow.append(resCol)
-                numRow += 1
-            newData = {"numrows" : matrices[operand1]['numrows'],
-                       "numcols" : matrices[operand2]['numcols'],
-                       "matrixdata": resRow}
-            name = calRequest['resultant']
-            matrices.update({name:newData})
-            return "AFTER MULTIPLICATION: " + render_template("matrixTable.html", res=matrices[name]['matrixdata'], name=name), 200
+        # judge whether the matrices are eligible to do the multiplication
+        if matrices[operand1]['numcols'] == matrices[operand2]['numrows']:
+            multiplication(calRequest['resultant'],matrices[operand1],matrices[operand2])
+            message = "Matrix " + calRequest['operationtype'] + " successed!"
+            success={'datatype':'status','statusmessage':message,'errorcode':0}
+            return jsonify(success)
         else: # prompt the error if the matrix cannot do multiplication
             error = {}
             error.update({'datatype': 'status'})
@@ -155,6 +144,80 @@ def do_calculations():
             error.update({'errorcode': 12})
             return jsonify(error)
 
+def add(name,matrixOne,matrixTwo):
+    '''
+    The addition function to add two matrix
+    :param name: the name of the resultant matrix
+    :param matrixOne: the operand1
+    :param matrixTwo: the operand2
+    :return: no returns
+    '''
+    row = 0
+    resRow = []  # initialize the new matrix
+    while (row < matrixOne['numrows']):
+        resCol = []
+        col = 0
+        while (col < matrixOne['numcols']):
+            resCol.append(matrixOne['matrixdata'][row][col] + matrixTwo['matrixdata'][row][col])
+            col += 1
+        resRow.append(resCol)
+        row += 1
+    newData = {"numrows": matrixOne['numrows'],
+               "numcols": matrixTwo['numcols'],
+               "matrixdata": resRow}
+    matrices.update({name: newData})
+
+def subtraction(name,matrixOne,matrixTwo):
+    '''
+    The subtraction function to subtract matrixTwo by matrixOne
+    :param name: the name of the resultant matrix
+    :param matrixOne: the first operand
+    :param matrixTwo: the second operand
+    :return: no returns
+    '''
+    row = 0
+    resRow = []  # initialize the new matrix
+    while (row < matrixOne['numrows']):
+        resCol = []
+        col = 0
+        while (col < matrixOne['numcols']):
+            resCol.append(matrixOne['matrixdata'][row][col] - matrixTwo['matrixdata'][row][col])
+            col += 1
+        resRow.append(resCol)
+        row += 1
+    newData = {"numrows": matrixOne['numrows'],
+               "numcols": matrixTwo['numcols'],
+               "matrixdata": resRow}
+    matrices.update({name: newData})
+
+def multiplication(name,matrixOne,matrixTwo):
+    '''
+    The multiplication function do the matrix multiplication
+    :param name: the name of the resultant matrix
+    :param matrixOne: the first operand
+    :param matrixTwo: the second operand
+    :return: no returns
+    '''
+    numRow = 0
+    resRow = []  # initialize the matrixdata for new matrix
+    while numRow < matrixOne['numrows']:
+        numCol = 0
+        resCol = []  # initialize each row of the matrix
+        while numCol < matrixTwo['numcols']:
+            numSameRowCol = 0
+            eachNum = 0
+            while numSameRowCol < matrixOne['numcols']:
+                eachNum += matrixOne['matrixdata'][numRow][numSameRowCol] * \
+                           matrixTwo['matrixdata'][numSameRowCol][numCol]
+                numSameRowCol += 1
+            resCol.append(eachNum)
+            numCol += 1
+        resRow.append(resCol)
+        numRow += 1
+    newData = {"numrows": matrixOne['numrows'],
+               "numcols": matrixTwo['numcols'],
+               "matrixdata": resRow}
+    matrices.update({name: newData})
 
 @app.errorhandler(404)
 def page_not_found(e):

@@ -1,41 +1,53 @@
 <!DOCTYPE html>
 <html lang = "en">
-    <meta charset = "UTF-8">
     <head>
+        <meta charset = "UTF-8">
         <title> Welcome </title>
     </head>
-    <body>
-        <header>
-            <h2> Welcome to the Matrix Calculation RESTFUL API</h2>
+    <body style="padding:5px 50px;margin:5px 50px;overflow:scroll;">
+        <header style="background: green;
+	background: -moz-linear-gradient(top, #666666 0%, #00b7ea 100%);
+	background: -webkit-linear-gradient(#666666 0%, #00b7ea 100%);
+	background: -o-linear-gradient(#666666 0%, #00b7ea 100%);
+	background: linear-gradient(#666666 0%, #00b7ea 100%);">
+            <h1 style="color:white;"> Welcome to the Matrix Calculation RESTful API</h1>
         </header>
         <section>
-            <h3>The Introduction of the Functions</h3>
+            <h3 style="color:#163fa2;">The Introduction of the Functions:</h3>
             <details>
-                <summary>Store A Matrix</summary>
+                <summary style="color:#163fa2;">Store A Matrix</summary>
                 <p>Using POST/PUT call with route "/matrices/(the name of the matrix you stored)"to store one matrix.
                     The example json format of the matrix is:</p>
-                <p>    {"datatype": "Matrix","name": "A","data":{"numrows":2,"numcols":2,"matrixdata":[[2,2],[2,2]]}}</p>
+                <p>{"datatype": "Matrix","name": "A","data":{"numrows":2,"numcols":2,"matrixdata":[[2,2],[2,2]]}}</p>
             </details>
             <details>
-                <summary>Display A Matrix</summary>
+                <summary style="color:#163fa2;">Display A Matrix</summary>
                 <p>Using GET call with route "/matrices/(the name of the matrix you want to display)".
             </details>
             <details>
-                <summary>Delete A Matrix</summary>
+                <summary style="color:#163fa2;">Delete A Matrix</summary>
                 <p>Using DELETE call with route "/matrices/(the name of the matrix you want to delete)".
             </details>
             <details>
-                <summary>Matrix Calculation</summary>
-                <p>Using POST call with route "/matrices/calculations" to do matrix calculations. You can indicate the operation in the json input.
+                <summary style="color:#163fa2;">Matrix Calculation</summary>
+                <p>Using POST call with route "/matrices/calculations" to do matrix calculations.</p>
+                <p>We support three types of calculations:
+                    <ul>
+                        <li>add</li>
+                        <li>subtraction</li>
+                        <li>multiplication</li>
+                    </ul>
+                </p>
+                <p>You can indicate the operation in the json input.
                     The example json format of the matrix is:</p>
                 <p> {"datatype": "operation","operationtype": "add","operand1": "A","operand2": "B","resultant": "C"}</p>
             </details>
         </section>
         <section>
-            <h3>All matrices currently stored are: </h3>
+            <h3 style="color:#163fa2;">All matrices currently stored are: </h3>
             <ul>
                 {% for matrix in storedMatrix %}
-                <li>{{ matrix }}:</li>
+                <li style="color:#163fa2;">{{ matrix }}:</li>
                     <table style="margin-right:200px">
                         {% for row in storedMatrix[matrix]['matrixdata'] %}
                         <tr style="padding-top:10px">
@@ -49,4 +61,11 @@
             </ul>
         </section>
     </body>
+    <footer style="background: green;
+	background: -moz-linear-gradient(top, #666666 0%, #00b7ea 100%);
+	background: -webkit-linear-gradient(#666666 0%, #00b7ea 100%);
+	background: -o-linear-gradient(#666666 0%, #00b7ea 100%);
+	background: linear-gradient(#666666 0%, #00b7ea 100%);">
+        <p style="color:white;">Copyright Reserved @ Yuxuan(Stella) Li</p>
+    </footer>
 </html>
