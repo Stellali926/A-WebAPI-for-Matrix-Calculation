@@ -1,4 +1,4 @@
-# A-WebAPI-for-Matrix-Calculation
+# A-Student-Info-Management-Web-Service
 ## Description
-a REST Web API for Basic matrix applications using the Flask microframework
+a RESTful Web API for student info management by using the Flask microframework
 
